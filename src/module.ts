@@ -6,7 +6,6 @@ import {MetricsPanelCtrl} from 'app/plugins/sdk';
 
 import _ from 'lodash';
 import moment from 'moment';
-import $ from 'jquery';
 
 import {
   SeriesWrapper,
@@ -44,7 +43,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
     },
     settings: {
       line: {
-        color: '#005f81',
+        color: '#93a8b3',
         width: 6,
         dash: 'solid',
         shape: 'linear',
@@ -52,13 +51,13 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
       marker: {
         size: 15,
         symbol: 'circle',
-        color: '#33B5E5',
+        color: '#93a8b3',
         colorscale: 'YlOrRd',
         sizemode: 'diameter',
         sizemin: 3,
         sizeref: 0.2,
         line: {
-          color: '#DDD',
+          color: '#93a8b3',
           width: 0,
         },
         showscale: false,
@@ -92,7 +91,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
         dragmode: 'lasso', // (enumerated: "zoom" | "pan" | "select" | "lasso" | "orbit" | "turntable" )
         hovermode: 'closest',
         font: {
-          family: '"Open Sans", Helvetica, Arial, sans-serif',
+          family: '"Lato", sans-serif',
         },
         xaxis: {
           showgrid: true,
@@ -101,7 +100,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
           rangemode: 'normal', // (enumerated: "normal" | "tozero" | "nonnegative" )
         },
         yaxis: {
-          showgrid: true,
+          showgrid: false,
           zeroline: false,
           type: 'linear',
           rangemode: 'normal', // (enumerated: "normal" | "tozero" | "nonnegative" ),
@@ -161,7 +160,6 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
 
     loadPlotly(this.cfg).then(v => {
       Plotly = v;
-      console.log('Plotly', v);
 
       // Wait till plotly exists has loaded before we handle any data
       this.events.on('render', this.onRender.bind(this));
@@ -207,6 +205,8 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
       this.layout.width = rect.width;
       this.layout.height = this.height;
       Plotly.redraw(this.graphDiv);
+      const event = new CustomEvent('loaded', { detail: window.frameElement.id });
+      window.parent.document.dispatchEvent(event);
     }
   }, 50);
 
@@ -230,6 +230,8 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
 
     if (this.graphDiv && this.initialized && Plotly) {
       Plotly.redraw(this.graphDiv);
+      const event = new CustomEvent('loaded', { detail: window.frameElement.id });
+      window.parent.document.dispatchEvent(event);
     }
   }
 
@@ -242,13 +244,11 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
 
     // Check the size in a little bit
     setTimeout(() => {
-      console.log('RESIZE in editor');
       this.onResize();
     }, 500);
   }
 
   processConfigMigration() {
-    console.log('Migrating Plotly Configuration to version: ' + PlotlyPanelCtrl.configVersion);
 
     // Remove some things that should not be saved
     const cfg = this.panel.pconfig;
@@ -277,7 +277,6 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
     }
 
     // TODO... MORE Migrations
-    console.log('After Migration:', cfg);
     this.cfg = cfg;
     this.panel.version = PlotlyPanelCtrl.configVersion;
   }
@@ -386,25 +385,10 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
         layout.xaxis.range = [range.from.valueOf(), range.to.valueOf()];
       }
 
-      // get the css rule of grafana graph axis text
-      const labelStyle = this.getCssRule('div.flot-text');
-      if (labelStyle) {
-        let color = labelStyle.style.color;
-        if (!layout.font) {
-          layout.font = {};
-        }
-        layout.font.color = color;
-
-        // make the grid a little more transparent
-        color = $.color
-          .parse(color)
-          .scale('a', 0.22)
-          .toString();
-
+        layout.font.color = '#5d6c76';
         // set gridcolor (like grafana graph)
-        layout.xaxis.gridcolor = color;
-        layout.yaxis.gridcolor = color;
-      }
+        layout.xaxis.gridcolor = 'rgba(147, 168, 179, 0.09)';
+        layout.yaxis.gridcolor = 'rgba(147, 168, 179, 0.09)';
 
       // Set the second axis
       layout.yaxis2 = PlotlyPanelCtrl.yaxis2;
@@ -438,6 +422,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
       if (this.annotations.shapes.length > 0) {
         traces = this.traces.concat(this.annotations.trace);
       }
+      console.log(this.graphDiv, this.graphDiv.emit);
       Plotly.react(this.graphDiv, traces, this.layout, options);
 
       this.graphDiv.on('plotly_click', data => {
@@ -485,7 +470,6 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
           return;
         }
 
-        console.log('SELECTED', data);
 
         let min = Number.MAX_SAFE_INTEGER;
         let max = Number.MIN_SAFE_INTEGER;
@@ -504,7 +488,6 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
 
         const range = {from: moment.utc(min), to: moment.utc(max)};
 
-        console.log('SELECTED!!!', min, max, data.points.length, range);
 
         this.timeSrv.setTime(range);
 
@@ -518,6 +501,8 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
       this.initialized = true;
     } else if (this.initialized) {
       Plotly.redraw(this.graphDiv);
+      const event = new CustomEvent('loaded', { detail: window.frameElement.id });
+      window.parent.document.dispatchEvent(event);
     } else {
       console.log('Not initialized yet!');
     }
@@ -698,12 +683,6 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
     if (force || !this.traces) {
       this._updateTracesFromConfigs();
     } else if (this.traces.length !== this.cfg.traces.length) {
-      console.log(
-        'trace number mismatch.  Found: ' +
-          this.traces.length +
-          ', expect: ' +
-          this.cfg.traces.length
-      );
       this._updateTracesFromConfigs();
     }
 
@@ -774,8 +753,9 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
         if (this.annotations.shapes.length > 0) {
           traces = this.traces.concat(this.annotations.trace);
         }
-        console.log('ConfigChanged (traces)', traces);
         Plotly.react(this.graphDiv, traces, this.layout, options);
+        const event = new CustomEvent('loaded', { detail: window.frameElement.id });
+        window.parent.document.dispatchEvent(event);
       }
 
       this.render(); // does not query again!

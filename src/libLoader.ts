@@ -35,14 +35,12 @@ export function loadIfNecessary(cfg: any): Promise<any> {
   }
 
   if (wasCDN !== cfg.loadFromCDN) {
-    console.log('Use CDN', cfg.loadFromCDN);
     loaded = null;
     return loadPlotly(cfg);
   }
 
   const needsFull = cfg.settings.type !== 'scatter';
   if (needsFull && !isFull) {
-    console.log('Switching to the full plotly library');
     loaded = null;
     return loadPlotly(cfg);
   }

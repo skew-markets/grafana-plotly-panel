@@ -100,12 +100,12 @@ export class EditorHelper {
       property: 'x',
       segment: this.mapping.x,
     });
-    this.axis.push({
+    /*this.axis.push({
       label: 'Y Axis',
       layout: layout.yaxis,
       property: 'y',
       segment: this.mapping.y,
-    });
+    });*/
 
     if (this.ctrl.is3d()) {
       if (!layout.zaxis) {
@@ -151,7 +151,6 @@ export class EditorHelper {
       this.updateSegMapping(value, key);
     });
 
-    console.log('Editor Info', this);
 
     this.onConfigChanged();
     this.ctrl.refresh();
@@ -184,7 +183,6 @@ export class EditorHelper {
 
     if (updateTrace) {
       this.trace.mapping[key] = value;
-      console.log('SET', key, value, this.trace.mapping);
     }
   }
 
