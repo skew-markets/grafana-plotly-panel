@@ -169,6 +169,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
       this.events.on('data-snapshot-load', this.onDataSnapshotLoad.bind(this));
       this.events.on('refresh', this.onRefresh.bind(this));
 
+      (window as (any | {refresh: Function })).refresh = this.refresh.bind(this);
       // Refresh after plotly is loaded
       this.refresh();
     });
@@ -205,8 +206,12 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
       this.layout.width = rect.width;
       this.layout.height = this.height;
       Plotly.redraw(this.graphDiv);
-      const event = new CustomEvent('loaded', { detail: window.frameElement.id });
-      window.parent.document.dispatchEvent(event);
+      try {
+        const event = new CustomEvent('loaded', { detail: window.frameElement.id });
+        window.parent.document.dispatchEvent(event);
+      } catch (err) {
+        console.log(err);
+      }
     }
   }, 50);
 
@@ -230,8 +235,12 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
 
     if (this.graphDiv && this.initialized && Plotly) {
       Plotly.redraw(this.graphDiv);
-      const event = new CustomEvent('loaded', { detail: window.frameElement.id });
-      window.parent.document.dispatchEvent(event);
+      try {
+        const event = new CustomEvent('loaded', { detail: window.frameElement.id });
+        window.parent.document.dispatchEvent(event);
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 
@@ -501,8 +510,12 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
       this.initialized = true;
     } else if (this.initialized) {
       Plotly.redraw(this.graphDiv);
-      const event = new CustomEvent('loaded', { detail: window.frameElement.id });
-      window.parent.document.dispatchEvent(event);
+      try {
+        const event = new CustomEvent('loaded', { detail: window.frameElement.id });
+        window.parent.document.dispatchEvent(event);
+      } catch (err) {
+        console.log(err);
+      }
     } else {
       console.log('Not initialized yet!');
     }
@@ -754,8 +767,12 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
           traces = this.traces.concat(this.annotations.trace);
         }
         Plotly.react(this.graphDiv, traces, this.layout, options);
-        const event = new CustomEvent('loaded', { detail: window.frameElement.id });
-        window.parent.document.dispatchEvent(event);
+        try {
+          const event = new CustomEvent('loaded', { detail: window.frameElement.id });
+          window.parent.document.dispatchEvent(event);
+        } catch (err) {
+          console.log(err);
+        }
       }
 
       this.render(); // does not query again!
