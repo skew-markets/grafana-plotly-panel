@@ -169,7 +169,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
       this.events.on('data-snapshot-load', this.onDataSnapshotLoad.bind(this));
       this.events.on('refresh', this.onRefresh.bind(this));
 
-      (window as (any | {refresh: Function })).refresh = this.refresh.bind(this);
+      (window as (any | {refresh: Function })).refresh = this.doResize.bind(this);
       // Refresh after plotly is loaded
       this.refresh();
     });
@@ -204,7 +204,7 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
     } else {
       const rect = this.graphDiv.getBoundingClientRect();
       this.layout.width = rect.width;
-      this.layout.height = this.height;
+      this.layout.height = window.innerHeight-42;
       Plotly.redraw(this.graphDiv);
       try {
         const event = new CustomEvent('loaded', { detail: window.frameElement.id });
