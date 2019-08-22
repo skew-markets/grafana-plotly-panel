@@ -396,8 +396,8 @@ class PlotlyPanelCtrl extends MetricsPanelCtrl {
 
         layout.font.color = '#5d6c76';
         // set gridcolor (like grafana graph)
-        layout.xaxis.gridcolor = 'rgba(147, 168, 179, 0.09)';
-        layout.yaxis.gridcolor = 'rgba(147, 168, 179, 0.09)';
+        layout.xaxis.gridcolor = 'rgba(93, 108, 118, 0.3)';
+        layout.yaxis.gridcolor = 'rgba(93, 108, 118, 0.3)';
 
       // Set the second axis
       layout.yaxis2 = PlotlyPanelCtrl.yaxis2;
